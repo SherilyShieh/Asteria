@@ -1,5 +1,5 @@
 apply plugin: 'com.android.application'
-
+apply plugin: 'com.neenbedankt.android-apt'
 android {
     compileSdkVersion 23
     buildToolsVersion "23.0.3"
@@ -17,10 +17,34 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
+    packagingOptions {
+        exclude 'META-INF/services/javax.annotation.processing.Processor'
+    }
 }
 
 dependencies {
     compile fileTree(dir: 'libs', include: ['*.jar'])
     testCompile 'junit:junit:4.12'
     compile 'com.android.support:appcompat-v7:23.4.0'
+    //recyclerview, 提供RecyclerView控件的功能.
+    compile 'com.android.support:recyclerview-v7:23.1.1'
+    //butterknife, 提供xml至java的id映射的功能.
+    compile 'com.jakewharton:butterknife:7.0.1'
+    //retrofit, 提供网络请求的支持的功能.
+    compile 'com.squareup.retrofit:retrofit:2.0.0-beta2'
+    compile 'com.squareup.retrofit:adapter-rxjava:2.0.0-beta2'
+    compile 'com.squareup.retrofit:converter-gson:2.0.0-beta2'
+    //rx, 提供rxandroid和rxjava支持的功能.
+    compile 'io.reactivex:rxandroid:1.1.0'
+    compile 'io.reactivex:rxjava:1.1.0'
+    //dagger2, 提供dagger2支持的功能.
+    compile 'com.google.dagger:dagger:2.0.2'
+    compile 'com.google.dagger:dagger-compiler:2.0.2'
+    //swipelayout,提供下拉刷新功能
+    compile 'com.daimajia.swipelayout:library:1.2.0@aar'
+    //annotation, 提供java注释解析的功能.
+    provided 'org.glassfish:javax.annotation:10.0-b28'
+    //aspectj,自定义注解
+    provided 'org.aspectj:aspectjrt:1.8.7'
+
 }

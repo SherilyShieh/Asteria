@@ -7,6 +7,11 @@ buildscript {
     dependencies {
         classpath 'com.android.tools.build:gradle:2.1.0'
 
+        //注解配置,android-apt, 提供dagger2使用编译生成类的功能.
+        classpath 'com.neenbedankt.gradle.plugins:android-apt:1.8'
+
+        //aspectj:自定义注解
+        classpath 'org.aspectj:aspectjtools:1.8.7'
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
     }
