@@ -46,5 +46,5 @@ dependencies {
     provided 'org.glassfish:javax.annotation:10.0-b28'
     //aspectj,自定义注解
     provided 'org.aspectj:aspectjrt:1.8.7'
-
+    compile files('libs/BaiduLBS_Android.jar')
 }
