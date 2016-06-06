@@ -12,6 +12,7 @@
     <color name="appTextNormal">#666666</color>
     <!-- 用于辅助的次要文字，图标-->
     <color name="appTextSecondary">#999999</color>
+    <color name="registerText">#b7b6b6</color>
     <color name="translucent">#CC000000</color>
     <color name="white">#FFF</color>
 </resources>

@@ -46,6 +46,7 @@
                 android:id="@+id/register_adr_text"
                 style="@style/BaseTextStyle"
                 android:layout_marginLeft="20dp"
+                android:layout_marginRight="20dp"
                 android:layout_marginStart="20dp"
                 android:text="注册地址" />
 
@@ -53,13 +54,15 @@
                 android:layout_toRightOf="@+id/register_adr_text"
                 android:layout_toLeftOf="@+id/register_edit"
                 android:id="@+id/register_address"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="10dp"
+                android:layout_marginLeft="30dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:ellipsize="end"
                 android:maxLines="2"
                 tools:text="税辅导辅导你是否记税是否记税辅导辅导你是否记税辅导辅导你是否记税辅导辅导你是否记税辅导辅导你是否记税辅导辅导你是否记" />
             <ImageView
+                android:clickable="true"
                 android:id="@+id/register_edit"
                 android:layout_width="15dp"
                 android:layout_height="15dp"
