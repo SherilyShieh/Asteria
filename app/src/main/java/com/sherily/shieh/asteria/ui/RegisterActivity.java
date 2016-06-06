@@ -14,8 +14,9 @@ import com.sherily.shieh.asteria.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class RegisterActivity extends BaseActivity implements View.OnClickListener {
+public class RegisterActivity extends BaseActivity {
 
     @Bind(R.id.back)
     ImageView back;
@@ -36,27 +37,35 @@ public class RegisterActivity extends BaseActivity implements View.OnClickListen
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
 
-        back.setOnClickListener(this);
-        registerAdrLayout.setOnClickListener(this);
-        confirmButton.setOnClickListener(this);
+    }
 
+
+    private void onNext() {
+        startActivity(new Intent(this, RegisterMapActivity.class));
+        overridePendingTransition(R.anim.slide_right_in, R.anim.slide_left_out);
+    }
+
+    private void onPre() {
+        startActivity(new Intent(this, MainActivity.class));
+        overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
+    }
+    @OnClick(R.id.back)
+    public void back() {
+       onPre();
     }
 
     @Override
-    public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.back:
-                Intent intent = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent);
-                break;
-            case R.id.register_adr_layout:
-                Intent intent2 = new Intent(RegisterActivity.this, RegisterMapActivity.class);
-                startActivity(intent2);
-            case R.id.confirm_button:
-                Intent intent1 = new Intent(RegisterActivity.this, MainActivity.class);
-                startActivity(intent1);
-                finish();
-                break;
-        }
+    public void onBackPressed() {
+        super.onBackPressed();
+        onPre();
+    }
+    @OnClick(R.id.register_adr_layout)
+    public void modfiyRegister() {
+        onNext();
+    }
+    @OnClick(R.id.confirm_button)
+    public void modfiyConfirm() {
+        onPre();
+        finish();
     }
 }

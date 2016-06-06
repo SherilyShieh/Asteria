@@ -12,8 +12,9 @@ import com.sherily.shieh.asteria.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
+import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity implements View.OnClickListener {
+public class MainActivity extends BaseActivity  {
 
     @Bind(R.id.back)
     ImageView back;
@@ -29,19 +30,16 @@ public class MainActivity extends BaseActivity implements View.OnClickListener {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        registerEdit.setOnClickListener(this);
-
     }
 
-    @Override
-    public void onClick(View v) {
 
-        Intent intent = new Intent(MainActivity.this, RegisterActivity.class);
-        startActivity(intent);
+    @OnClick(R.id.register_edit)
+    public void modifyRegisterAddress() {
+        startActivity(new Intent(this, RegisterActivity.class));
+        overridePendingTransition(R.anim.slide_right_in, R.anim.slide_left_out);
     }
 
 }

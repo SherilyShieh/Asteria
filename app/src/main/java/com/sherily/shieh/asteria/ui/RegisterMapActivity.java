@@ -38,6 +38,34 @@ public class RegisterMapActivity extends BaseActivity implements View.OnClickLis
 
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        mapView.onResume();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mapView.onPause();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        mapView.onDestroy();
+    }
+
+    private void onPre() {
+        startActivity(new Intent(this, RegisterMapActivity.class));
+        overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
+    }
 
     @Override
     public void onClick(View v) {
