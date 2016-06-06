@@ -8,4 +8,28 @@
         <item name="colorAccent">@color/colorAccent</item>
     </style>
 
+    <!--标题栏的样式-->
+    <style name="TitleBarStyle">
+        <item name="android:background">@color/appPrimary</item>
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingTop">10dp</item>
+        <item name="android:paddingBottom">10dp</item>
+    </style>
+
+    <!--通用的背景透明，内容包裹的TextView样式-->
+    <style name="BaseTextStyle">
+        <item name="android:textColor">@color/appTextNormal</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">@null</item>
+    </style>
+
+    <!--个人中心等页面的RelativeLayout 作为父容器的样式，重复次数比较多-->
+    <style name="RelativeLayoutItemStyle">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:paddingBottom">15dp</item>
+        <item name="android:paddingTop">15dp</item>
+    </style>
 </resources>

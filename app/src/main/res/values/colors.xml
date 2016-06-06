@@ -3,4 +3,15 @@
     <color name="colorPrimary">#3F51B5</color>
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#FF4081</color>
+    <!-- 重要-->
+    <!--小面积使用，用于特别需要强调突出的按钮和图标-->
+    <color name="appPrimary">#56C9FF</color>
+    <!-- 用于显示重要文字信息，内页标题信息-->
+    <color name="appTextPrimary">#333333</color>
+    <!-- 用于次一级以及普通字段，描述性文字-->
+    <color name="appTextNormal">#666666</color>
+    <!-- 用于辅助的次要文字，图标-->
+    <color name="appTextSecondary">#999999</color>
+    <color name="translucent">#CC000000</color>
+    <color name="white">#FFF</color>
 </resources>
