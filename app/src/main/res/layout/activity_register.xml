@@ -54,7 +54,7 @@
                 android:id="@+id/address"
                 android:text="这是一个神奇的地方可以你可以在这里"
                 android:textSize="20sp"
-                android:textColor="@color/translucent"
+                android:textColor="@color/appTextPrimary"
                 android:layout_marginLeft="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -76,7 +76,7 @@
                 android:id="@+id/register_adr"
                 android:textSize="20sp"
                 android:background="@null"
-                android:textColor="@color/translucent"
+                android:textColor="@color/appTextPrimary"
                 android:layout_marginLeft="20dp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content" />
@@ -93,7 +93,6 @@
                 android:id="@+id/confirm_button"
                 android:width="120dp"
                 android:textSize="15sp"
-                android:enabled="false"
                 android:textColor="@color/button_color_selector"
                 android:background="@drawable/button_selector"
                 android:singleLine="true"
