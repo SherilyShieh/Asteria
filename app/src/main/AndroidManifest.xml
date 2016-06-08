@@ -46,7 +46,8 @@
             </intent-filter>
         </activity>
         <activity android:name=".ui.RegisterActivity" />
-        <activity android:name=".ui.RegisterMapActivity"></activity>
+        <activity android:name=".ui.RegisterMapActivity" />
+        <activity android:name=".ui.LocationActivity"></activity>
     </application>
 
 </manifest>
