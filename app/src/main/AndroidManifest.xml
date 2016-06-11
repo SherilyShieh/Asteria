@@ -48,6 +48,13 @@
         <activity android:name=".ui.RegisterActivity" />
         <activity android:name=".ui.RegisterMapActivity" />
         <activity android:name=".ui.LocationActivity"></activity>
+        <!--注册百度地图定位服务-->
+        <service
+            android:name="com.baidu.location.f"
+            android:enabled="true"
+            android:process=":remote">
+        </service>
+
     </application>
 
 </manifest>
