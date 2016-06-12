@@ -2,19 +2,17 @@ package com.sherily.shieh.asteria.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
-import com.baidu.mapapi.map.MapView;
 import com.sherily.shieh.asteria.R;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
 
-public class MainActivity extends BaseActivity  {
+public class MainActivity extends BaseActivity {
 
     @Bind(R.id.back)
     ImageView back;
@@ -26,6 +24,8 @@ public class MainActivity extends BaseActivity  {
     TextView registerAddress;
     @Bind(R.id.register_edit)
     ImageView registerEdit;
+    @Bind(R.id.register_adr)
+    RelativeLayout registerAdr;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,7 +36,7 @@ public class MainActivity extends BaseActivity  {
     }
 
 
-    @OnClick(R.id.register_edit)
+    @OnClick(R.id.register_adr)
     public void modifyRegisterAddress() {
         startActivity(new Intent(this, RegisterActivity.class));
         overridePendingTransition(R.anim.slide_right_in, R.anim.slide_left_out);

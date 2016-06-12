@@ -38,6 +38,7 @@ import com.baidu.mapapi.search.poi.PoiResult;
 import com.baidu.mapapi.search.poi.PoiSearch;
 import com.baidu.mapapi.search.poi.PoiSortType;
 import com.sherily.shieh.asteria.R;
+import com.sherily.shieh.asteria.baidumaputils.GeoCoderHelper;
 import com.sherily.shieh.asteria.baidumaputils.LocationHelper;
 import com.sherily.shieh.asteria.baidumaputils.MyLocation;
 import com.sherily.shieh.asteria.event.LocationEvent;
@@ -74,65 +75,16 @@ public class RegisterMapActivity extends BaseActivity {
     private BaiduMap mBaiduMap;
 
     private MyLocation myLocation;
+
+    private GeoCoderHelper geoCoderHelper;
     private double latitude;
     private double longitude;
     private String[] adr1;
     private String[] adr2;
 
     private RegisterAddressRecyclerviewAdapter adapter;
-    private PoiSearch mPoiSearch;
 
-    private ArrayList arrayList = null;
 
-    private OnGetPoiSearchResultListener poiSearchResultListener = new OnGetPoiSearchResultListener() {
-        @Override
-        public void onGetPoiResult(PoiResult poiResult) {
-            if (poiResult != null) {
-                if (poiResult.getAllPoi()!=null&&poiResult.getAllPoi().size()>0){
-                    arrayList.addAll(poiResult.getAllPoi());
-                    if (arrayList != null && arrayList.size() > 0) {
-                        for (int i = 0; i < arrayList.size(); i++) {
-                            Log.d(TAG, arrayList.get(i).toString());
-                        }
-                    }
-//                    Message msg = new Message();
-//                    msg.what = 0;
-//                    handler.sendMessage(msg);
-                }
-
-            }
-
-        }
-
-        @Override
-        public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
-
-        }
-    };
-
-    /**
-     * 覆盖物监听
-     */
-    private BaiduMap.OnMarkerClickListener mOnMarkerClickListener = new BaiduMap.OnMarkerClickListener() {
-        @Override
-        public boolean onMarkerClick(Marker marker) {
-            return true;
-        }
-    };
-    /**
-     *
-     */
-    private BaiduMap.OnMapClickListener mOnMapClickListener = new BaiduMap.OnMapClickListener() {
-        @Override
-        public void onMapClick(LatLng latLng) {
-
-        }
-
-        @Override
-        public boolean onMapPoiClick(MapPoi mapPoi) {
-            return false;
-        }
-    };
 
     private BaiduMap.OnMapStatusChangeListener mOnMapStatusChangeListener = new BaiduMap.OnMapStatusChangeListener() {
         @Override
@@ -147,8 +99,9 @@ public class RegisterMapActivity extends BaseActivity {
 
         @Override
         public void onMapStatusChangeFinish(MapStatus mapStatus) {
-
-
+            LatLng latLng = mapStatus.target;//地图中心点
+            geoCoderHelper = new GeoCoderHelper(latLng);
+            geoCoderHelper.reverseGeoCode();
         }
     };
 
@@ -167,21 +120,16 @@ public class RegisterMapActivity extends BaseActivity {
 
         // 开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
+        mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
         //定位初始化
         //注意: 实例化定位服务 LocationClient类必须在主线程中声明 并注册定位监听接口
         myLocation = MyLocation.getMyLocation(mBaiduMap, this,latitude, longitude);
         myLocation.setLocationOption();
         myLocation.start();
 
-//        arrayList = new ArrayList();
-//        mPoiSearch =PoiSearch.newInstance();
-//        mPoiSearch.setOnGetPoiSearchResultListener(poiSearchResultListener);
+       // mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
+       // mBaiduMap.setOnMapClickListener(mOnMapClickListener);
 
-
-
-        mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
-        mBaiduMap.setOnMapClickListener(mOnMapClickListener);
-        mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
 
         //隐藏baiduMap logo
         View logo = mapView.getChildAt(1);
@@ -244,6 +192,7 @@ public class RegisterMapActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         myLocation.stop();
+        geoCoderHelper.clear();
         mapView.onDestroy();
 
     }

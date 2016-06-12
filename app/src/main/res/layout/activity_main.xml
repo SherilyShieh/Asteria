@@ -38,6 +38,7 @@
         android:layout_height="wrap_content">
         <!--注册地址-->
         <RelativeLayout
+            android:id="@+id/register_adr"
             style="@style/RelativeLayoutItemStyle"
             android:background="@drawable/light_bottom_line">
 
