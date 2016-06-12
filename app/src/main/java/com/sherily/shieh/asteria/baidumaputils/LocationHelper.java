@@ -115,7 +115,10 @@ public class LocationHelper {
         //设置显示地址
         mLocationClientOption.setIsNeedAddress(true);
         mLocationClientOption.setAddrType("all");
-
+        mLocationClientOption.disableCache(false);//禁止启用缓存定位
+        mLocationClientOption.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
+        mLocationClientOption.setIsNeedLocationDescribe(true);//可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
+        mLocationClientOption.setIsNeedLocationPoiList(true);//可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
         mLocationClient.setLocOption(mLocationClientOption);
         return this;
     }

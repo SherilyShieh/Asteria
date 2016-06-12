@@ -3,6 +3,8 @@ package com.sherily.shieh.asteria.ui;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.Message;
+import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.View;
@@ -29,15 +31,31 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
+import com.baidu.mapapi.search.poi.PoiDetailResult;
+import com.baidu.mapapi.search.poi.PoiNearbySearchOption;
+import com.baidu.mapapi.search.poi.PoiResult;
+import com.baidu.mapapi.search.poi.PoiSearch;
+import com.baidu.mapapi.search.poi.PoiSortType;
 import com.sherily.shieh.asteria.R;
+import com.sherily.shieh.asteria.baidumaputils.LocationHelper;
+import com.sherily.shieh.asteria.baidumaputils.MyLocation;
+import com.sherily.shieh.asteria.event.LocationEvent;
+import com.sherily.shieh.asteria.ui.adapter.DividerItemDecoration;
+import com.sherily.shieh.asteria.ui.adapter.RegisterAddressRecyclerviewAdapter;
+
+import java.util.ArrayList;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
+import de.greenrobot.event.EventBus;
 import retrofit.http.PUT;
 
 public class RegisterMapActivity extends BaseActivity {
 
+
+    private static final String TAG = "RegisterMapActivity" ;
     @Bind(R.id.back)
     ImageView back;
     @Bind(R.id.topPanel)
@@ -51,96 +69,46 @@ public class RegisterMapActivity extends BaseActivity {
     @Bind(R.id.recyclerView)
     RecyclerView recyclerView;
 
+    
     //百度地图对象
     private BaiduMap mBaiduMap;
-    //是否首次定位
-    private  boolean isFirstLoc = true;
-   //定位SDK的核心类
-    private LocationClient mLocClient;
-    //定位图层显示模式 (普通-跟随-罗盘)
-    private MyLocationConfiguration.LocationMode mCurrentMode;
 
+    private MyLocation myLocation;
     private double latitude;
     private double longitude;
-//    //定位图标描述
-//    private BitmapDescriptor mCurrentMarker = null;
-//
-    //定位SDK监听函数
-    public MyLocationListenner locListener = new MyLocationListenner();
+    private String[] adr1;
+    private String[] adr2;
 
-    private BDLocation mlocation;
+    private RegisterAddressRecyclerviewAdapter adapter;
+    private PoiSearch mPoiSearch;
 
-    /**
-     * 定位SDK监听器 需添加locSDK jar和so文件
-     */
-    public class MyLocationListenner implements BDLocationListener {
+    private ArrayList arrayList = null;
 
-
+    private OnGetPoiSearchResultListener poiSearchResultListener = new OnGetPoiSearchResultListener() {
         @Override
-        public void onReceiveLocation(BDLocation location) {
-            //mapview 销毁后不在处理新接收的位置
-            if (location == null || mBaiduMap == null) {
-                return;
-            }
-            StringBuilder sb = new StringBuilder(256);
-            sb.append("time:");
-            sb.append(location.getTime());
-            sb.append("\nerror code : ");
-            sb.append(location.getLocType());
-            sb.append("\nlatitude : ");
-            sb.append(location.getLatitude());
-            sb.append("\nlontitude : ");
-            sb.append(location.getLongitude());
-            sb.append("\nradius : ");
-            sb.append(location.getRadius());
-            if (location.getLocType() == BDLocation.TypeGpsLocation) {
-                sb.append("\nspeed : ");
-                sb.append(location.getSpeed());
-                sb.append("\nsatellite : ");
-                sb.append(location.getSatelliteNumber());
-            } else if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
-                sb.append("\naddr : ");
-                sb.append(location.getAddrStr());
-                sb.append(location.getLocationDescribe());
-            }
-            Log.e("log", sb.toString());
+        public void onGetPoiResult(PoiResult poiResult) {
+            if (poiResult != null) {
+                if (poiResult.getAllPoi()!=null&&poiResult.getAllPoi().size()>0){
+                    arrayList.addAll(poiResult.getAllPoi());
+                    if (arrayList != null && arrayList.size() > 0) {
+                        for (int i = 0; i < arrayList.size(); i++) {
+                            Log.d(TAG, arrayList.get(i).toString());
+                        }
+                    }
+//                    Message msg = new Message();
+//                    msg.what = 0;
+//                    handler.sendMessage(msg);
+                }
 
-
-            //MyLocationData.Builder定位数据建造器
-            MyLocationData locData = new MyLocationData.Builder()
-                    .accuracy(location.getRadius())
-                    .direction(100)
-                    .latitude(location.getLatitude())
-                    .longitude(location.getLongitude())
-                    .accuracy(location.getRadius())
-                    .direction(location.getDirection())
-                    .build();
-            //设置定位数据
-            mBaiduMap.setMyLocationData(locData);
-            mCurrentMode = MyLocationConfiguration.LocationMode.NORMAL;
-            //获取经纬度
-            latitude = location.getLatitude();
-            longitude = location.getLongitude();
-            //Toast.makeText(getApplicationContext(), String.valueOf(latitude), Toast.LENGTH_SHORT).show();
-            //第一次定位的时候，那地图中心点显示为定位到的位置
-            if (isFirstLoc) {
-                isFirstLoc = false;
-                //地理坐标基本数据结构
-                LatLng loc = new LatLng(location.getLatitude(),location.getLongitude());
-                //MapStatusUpdate描述地图将要发生的变化
-                //MapStatusUpdateFactory生成地图将要反生的变化
-                MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(loc);
-                mBaiduMap.animateMapStatus(msu);
-//                Toast.makeText(getApplicationContext(), location.getAddrStr(),
-//                        Toast.LENGTH_SHORT).show();
             }
+
         }
 
+        @Override
+        public void onGetPoiDetailResult(PoiDetailResult poiDetailResult) {
 
-
-    }
-
-
+        }
+    };
 
     /**
      * 覆盖物监听
@@ -201,20 +169,14 @@ public class RegisterMapActivity extends BaseActivity {
         mBaiduMap.setMyLocationEnabled(true);
         //定位初始化
         //注意: 实例化定位服务 LocationClient类必须在主线程中声明 并注册定位监听接口
-        mLocClient = new LocationClient(this);
-        mLocClient.registerLocationListener(locListener);
-        LocationClientOption option = new LocationClientOption();
-        option.setOpenGps(true);              //打开GPS
-        option.setCoorType("bd09ll");        //设置坐标类型
-        option.setScanSpan(1000);            //设置发起定位请求的间隔时间为1000ms
-        option.setLocationMode(LocationClientOption.LocationMode.Hight_Accuracy); // 可选，默认高精度，设置定位模式，高精度，低功耗，仅设备
-        option.disableCache(false);//禁止启用缓存定位
-        option.setIsNeedAddress(true);//可选，设置是否需要地址信息，默认不需要
-        option.setIsNeedLocationDescribe(true);//可选，默认false，设置是否需要位置语义化结果，可以在BDLocation.getLocationDescribe里得到，结果类似于“在北京天安门附近”
-        option.setIsNeedLocationPoiList(true);//可选，默认false，设置是否需要POI结果，可以在BDLocation.getPoiList里得到
+        myLocation = MyLocation.getMyLocation(mBaiduMap, this,latitude, longitude);
+        myLocation.setLocationOption();
+        myLocation.start();
 
-        mLocClient.setLocOption(option);     //设置定位参数
-        mLocClient.start();                  //调用此方法开始定位
+//        arrayList = new ArrayList();
+//        mPoiSearch =PoiSearch.newInstance();
+//        mPoiSearch.setOnGetPoiSearchResultListener(poiSearchResultListener);
+
 
 
         mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
@@ -225,58 +187,30 @@ public class RegisterMapActivity extends BaseActivity {
         View logo = mapView.getChildAt(1);
         logo.setVisibility(View.INVISIBLE);
 
-    }
-    private void MoveToSelf() {
-        LatLng ll = new LatLng(latitude, longitude);
-        if (ll != null && mBaiduMap != null) {
-            MapStatus mapStatus = new MapStatus.Builder()
-                    .target(ll)
-                    .zoom(15)
-                    .build();
-            MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
-            mBaiduMap.animateMapStatus(u);
-        } else {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MoveToSelf();
-                }
-            }, 1000);
-        }
+        setData();
+        recyclerView.setHasFixedSize(true);
+        adapter = new RegisterAddressRecyclerviewAdapter(this,adr1,adr2);
+        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        recyclerView.setLayoutManager(layoutManager);
+        recyclerView.setAdapter(adapter);
+        //recyclerView.addItemDecoration(new RecyclerviewDecoration(this,LinearLayoutManager.VERTICAL));
+        recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL_LIST));
+
     }
 
-//    /**
-//     * 定位并添加标注
-//     */
-//    private void addMyLocation() {
-//        //更新
-//        mBaiduMap.setMyLocationConfigeration(new MyLocationConfiguration(
-//                mCurrentMode, true, mCurrentMarker));
-//        mBaiduMap.clear();
-//        //定义Maker坐标点
-//        LatLng point = new LatLng(latitude, longitude);
-//        //构建Marker图标
-//        BitmapDescriptor bitmap = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
-//        //构建MarkerOption，用于在地图上添加Marker
-//        OverlayOptions option = new MarkerOptions()
-//                .position(point)
-//                .icon(bitmap);
-//        //在地图上添加Marker，并显示
-//        mBaiduMap.addOverlay(option);
-//    }
+    private void setData() {
+        //UI测试数据，实际存放定位地址数据
+        adr1 = new String[] {"花果山","水帘洞","高老庄","御花园"};
+        adr2 = new String[] {"1001","1002","1003","1004"};
+//        adr1 = (String[]) myLocation.getArrayList1().toArray();
+//        adr2 = (String[]) myLocation.getArrayList2().toArray();
+    }
 
     @OnClick(R.id.location)
     public void location() {
-
-        //addMyLocation();
-        MoveToSelf();
-//        showAddress(mlocation);
+        myLocation.MoveToSelf();
     }
 
-//    private void showAddress(BDLocation location) {
-//        Toast.makeText(RegisterMapActivity.this, "我的位置："+location.getAddrStr()
-//                , Toast.LENGTH_SHORT).show();
-//    }
 
     @Override
     protected void onStart() {
@@ -303,14 +237,13 @@ public class RegisterMapActivity extends BaseActivity {
         super.onStop();
         // 关闭图层定位
         mBaiduMap.setMyLocationEnabled(false);
+        myLocation.stop();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        if(mLocClient != null){
-            mLocClient.stop();
-        }
+        myLocation.stop();
         mapView.onDestroy();
 
     }

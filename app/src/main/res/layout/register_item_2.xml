@@ -13,6 +13,7 @@
             android:text="杭州胡庆余堂药业有限公司(正门)"
             android:textColor="@color/appTextNormal"
             android:textSize="15sp"
+            android:id="@+id/location1"
             android:layout_width="match_parent"
             android:layout_height="wrap_content" />
 
@@ -20,6 +21,7 @@
     <TextView
         android:text="钱江路附近"
         android:textSize="12sp"
+        android:id="@+id/location2"
         android:textColor="@color/appTextSecondary"
         android:layout_width="match_parent"
         android:layout_height="wrap_content" />

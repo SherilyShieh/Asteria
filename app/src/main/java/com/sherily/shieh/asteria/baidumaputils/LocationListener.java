@@ -74,38 +74,5 @@ public class LocationListener implements BDLocationListener {
         SharePrefHelper.getInstance(context).putString(LOCATION_LNG_NAME, Double.toString(bdLocation.getLongitude()));
 
         EventBus.getDefault().post(bdLocation);
-
-//        StringBuffer stringBuffer = new StringBuffer(512);
-//        stringBuffer.append("定位信息已更新:\nTime：");
-//        stringBuffer.append(bdLocation.getTime());
-//        stringBuffer.append("\n城市：");
-//        stringBuffer.append(bdLocation.getCity());
-//        stringBuffer.append("\nLocationType:");
-//        stringBuffer.append(bdLocation.getLocType());
-//        stringBuffer.append("\nLatitude:");
-//        stringBuffer.append(bdLocation.getLatitude());
-//        stringBuffer.append(" ;Lontitude:");
-//        stringBuffer.append(bdLocation.getLongitude());
-//        stringBuffer.append("\nRadius:");
-//        stringBuffer.append(bdLocation.getRadius());
-//        if (bdLocation.getLocType() == BDLocation.TypeGpsLocation) {
-//            //GPS定位类型
-//            stringBuffer.append("\nSpeed:");
-//            stringBuffer.append(bdLocation.getSpeed());
-//            stringBuffer.append("\nSatelliteNumber:");
-//            stringBuffer.append(bdLocation.getSatelliteNumber());
-//            stringBuffer.append("\nDirection:");
-//            stringBuffer.append(bdLocation.getDirection());
-//            stringBuffer.append("\nAddress:");
-//            stringBuffer.append(bdLocation.getAddrStr());
-//        } else if (bdLocation.getLocType() == BDLocation.TypeNetWorkLocation) {
-//            stringBuffer.append("\nAddress:");
-//            stringBuffer.append(bdLocation.getAddrStr());
-//            //运营商信息
-//            stringBuffer.append("\nOperationers:");
-//            stringBuffer.append(bdLocation.getOperators());
-//        }
-//
-//        Log.i(LOG_TAG, stringBuffer.toString());
     }
 }
