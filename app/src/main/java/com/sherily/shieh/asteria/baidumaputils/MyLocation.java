@@ -28,8 +28,6 @@ public class MyLocation {
     private double latitude;
     private double longitude;
 
-    private ArrayList arrayList1 = null;
-    private ArrayList arrayList2 = null;
 
     private MyLocation(BaiduMap mBaiduMap, Context context, double latitude, double longitude) {
         this.mBaiduMap = mBaiduMap;
@@ -92,10 +90,10 @@ public class MyLocation {
      * 关闭定位功能
      */
     public void stop() {
-        if (mLocClient.isStarted()) {
-            mLocClient.stop();
             mLocClient.unRegisterLocationListener(locListener);
-        }
+            mLocClient.stop();
+
+
     }
     /**
      * 定位SDK监听器 需添加locSDK jar和so文件
@@ -132,7 +130,7 @@ public class MyLocation {
             //MyLocationData.Builder定位数据建造器
             MyLocationData locData = new MyLocationData.Builder()
                     .accuracy(location.getRadius())
-                    .direction(100)
+                    .direction(location.getDirection())// 此处设置开发者获取到的方向信息，顺时针0-360
                     .latitude(location.getLatitude())
                     .longitude(location.getLongitude())
                     .accuracy(location.getRadius())
@@ -152,29 +150,11 @@ public class MyLocation {
                 //MapStatusUpdate描述地图将要发生的变化
                 //MapStatusUpdateFactory生成地图将要反生的变化
                 MapStatusUpdate msu = MapStatusUpdateFactory.newLatLng(loc);
-                mBaiduMap.animateMapStatus(msu);
+                mBaiduMap.animateMapStatus(msu);// animationMapStatus()方法把定位到的点移动到地图中心
             }
-
-            arrayList1 = new ArrayList();
-            arrayList2 = new ArrayList();
-            if (arrayList1.size() <= 1 && arrayList2.size() <= 1){
-                if (location.getLocType() == BDLocation.TypeNetWorkLocation) {
-                    arrayList1.add(location.getAddress());
-                    arrayList2.add(location.getLocationDescribe());
-                }
-            } else {
-                arrayList1.clear();
-                arrayList2.clear();
-            }
+            //Log.d("location",location.getAddrStr()+"::"+location.getLocationDescribe()+"::"+location.getAddress());
+            stop();
         }
-    }
-
-    public ArrayList getArrayList1() {
-        return arrayList1;
-    }
-
-    public ArrayList getArrayList2() {
-        return arrayList2;
     }
 
     public void MoveToSelf() {

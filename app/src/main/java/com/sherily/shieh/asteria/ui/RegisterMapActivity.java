@@ -31,6 +31,8 @@ import com.baidu.mapapi.map.MyLocationData;
 import com.baidu.mapapi.map.OverlayOptions;
 import com.baidu.mapapi.map.TextureMapView;
 import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.PoiInfo;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.mapapi.search.poi.OnGetPoiSearchResultListener;
 import com.baidu.mapapi.search.poi.PoiDetailResult;
 import com.baidu.mapapi.search.poi.PoiNearbySearchOption;
@@ -41,11 +43,13 @@ import com.sherily.shieh.asteria.R;
 import com.sherily.shieh.asteria.baidumaputils.GeoCoderHelper;
 import com.sherily.shieh.asteria.baidumaputils.LocationHelper;
 import com.sherily.shieh.asteria.baidumaputils.MyLocation;
+import com.sherily.shieh.asteria.baidumaputils.PoiSearchHelper;
 import com.sherily.shieh.asteria.event.LocationEvent;
 import com.sherily.shieh.asteria.ui.adapter.DividerItemDecoration;
 import com.sherily.shieh.asteria.ui.adapter.RegisterAddressRecyclerviewAdapter;
 
 import java.util.ArrayList;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -77,10 +81,13 @@ public class RegisterMapActivity extends BaseActivity {
     private MyLocation myLocation;
 
     private GeoCoderHelper geoCoderHelper;
+    private PoiSearchHelper poiSearchHelper;
     private double latitude;
     private double longitude;
-    private String[] adr1;
-    private String[] adr2;
+//    private String[] adr1;
+//    private String[] adr2;
+    private ArrayList<PoiInfo> list;
+    private ArrayList<ReverseGeoCodeResult> list2;
 
     private RegisterAddressRecyclerviewAdapter adapter;
 
@@ -100,8 +107,11 @@ public class RegisterMapActivity extends BaseActivity {
         @Override
         public void onMapStatusChangeFinish(MapStatus mapStatus) {
             LatLng latLng = mapStatus.target;//地图中心点
-            geoCoderHelper = new GeoCoderHelper(latLng);
+            geoCoderHelper.setLatLng(latLng);
             geoCoderHelper.reverseGeoCode();
+            //poiSearchHelper.setLatLng(latLng);
+            //poiSearchHelper.searchNearby();
+
         }
     };
 
@@ -110,6 +120,15 @@ public class RegisterMapActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_map);
         ButterKnife.bind(this);
+
+        Log.d("oncreate","oncreate");
+
+        list = new ArrayList<PoiInfo>();
+        list2 = new ArrayList<ReverseGeoCodeResult>();
+        geoCoderHelper = new GeoCoderHelper();
+        poiSearchHelper = new PoiSearchHelper();
+
+        //setData();
         //地图相关初始化
         mapView.showZoomControls(false);
         mBaiduMap = mapView.getMap();
@@ -135,23 +154,44 @@ public class RegisterMapActivity extends BaseActivity {
         View logo = mapView.getChildAt(1);
         logo.setVisibility(View.INVISIBLE);
 
-        setData();
+
         recyclerView.setHasFixedSize(true);
-        adapter = new RegisterAddressRecyclerviewAdapter(this,adr1,adr2);
-        RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
+        adapter = new RegisterAddressRecyclerviewAdapter(RegisterMapActivity.this,list2,list);
+        final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
         //recyclerView.addItemDecoration(new RecyclerviewDecoration(this,LinearLayoutManager.VERTICAL));
         recyclerView.addItemDecoration(new DividerItemDecoration(this,DividerItemDecoration.VERTICAL_LIST));
+        geoCoderHelper.setListener(new GeoCoderHelper.onReverseGeoCodeResultListener() {
+            @Override
+            public void result(Object obj,LatLng latLng) {
+                adapter.setData((ReverseGeoCodeResult) obj,latLng);
+            }
+        });
+//        poiSearchHelper.setListener(new PoiSearchHelper.OnPoiResultListener() {
+//            @Override
+//            public void result(List<PoiInfo> datas) {
+////                list.clear();
+////                Log.d("lllll",datas.size()+"");
+////                list.addAll(datas);
+////                for (PoiInfo poiInfo : list){
+////                    Log.d("llaaaaa：",poiInfo.address);
+////                }
+////                adapter.notifyDataSetChanged();
+//                adapter.setData(datas);
+//            }
+//        });
 
     }
 
     private void setData() {
         //UI测试数据，实际存放定位地址数据
-        adr1 = new String[] {"花果山","水帘洞","高老庄","御花园"};
-        adr2 = new String[] {"1001","1002","1003","1004"};
+//        adr1 = new String[] {"花果山","水帘洞","高老庄","御花园"};
+//        adr2 = new String[] {"1001","1002","1003","1004"};
 //        adr1 = (String[]) myLocation.getArrayList1().toArray();
 //        adr2 = (String[]) myLocation.getArrayList2().toArray();
+
+
     }
 
     @OnClick(R.id.location)
@@ -198,7 +238,7 @@ public class RegisterMapActivity extends BaseActivity {
     }
 
     private void onPre() {
-        startActivity(new Intent(this, RegisterMapActivity.class));
+//        startActivity(new Intent(this, RegisterMapActivity.class));
         overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
     }
 

@@ -1,16 +1,25 @@
 package com.sherily.shieh.asteria.ui.adapter;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
 
+import com.baidu.mapapi.model.LatLng;
+import com.baidu.mapapi.search.core.PoiInfo;
+import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.sherily.shieh.asteria.R;
+import com.sherily.shieh.asteria.ui.RegisterActivity;
 import com.sherily.shieh.asteria.ui.RegisterMapActivity;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -20,23 +29,36 @@ import butterknife.ButterKnife;
  */
 public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
-
+    private static final String TAG = "RegisterAddressRecyclerviewAdapter";
 
     private String[] address1;
     private String[] address2;
     private LayoutInflater inflater;
     private Context context;
+    private ArrayList<PoiInfo> list;
+    private ArrayList<ReverseGeoCodeResult> list2;
+    private LatLng latLng;
    // private SharedPreferences dataPref;
 
-    private onDataSetChangeListener onDataSetChangeListener;
-
-    public RegisterAddressRecyclerviewAdapter(Context context, String[] address1, String[] address2) {
+    public RegisterAddressRecyclerviewAdapter(Context context, ArrayList<ReverseGeoCodeResult> list2, ArrayList<PoiInfo> list) {
         this.context = context;
-        this.address1 = address1;
-        this.address2 = address2;
         inflater = LayoutInflater.from(context);
-        //dataPref = context.getSharedPreferences("address_selected" , context.MODE_PRIVATE);
+        this.list2 = list2;
+        this.list = list;
     }
+
+
+//    public RegisterAddressRecyclerviewAdapter(Context context, ArrayList list,ArrayList list2) {
+//        this.context = context;
+//        this.list = list;
+//
+////        this.address1 = address1;
+////        this.address2 = address2;
+//        inflater = LayoutInflater.from(context);
+//
+//        //dataPref = context.getSharedPreferences("address_selected" , context.MODE_PRIVATE);
+//    }
+
 
     //建立枚举 2个item 类型
     public enum ITEM_TYPE {
@@ -68,37 +90,57 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
 
         if (holder instanceof Item1ViewHolder) {
-            ((Item1ViewHolder) holder).location1.setText(address1[position]);
-            ((Item1ViewHolder) holder).location2.setText(address2[position]);
+                ((Item1ViewHolder) holder).location1.setText(list2.get(position).getAddress());
+                ((Item1ViewHolder) holder).location2.setText(list2.get(position).getAddressDetail().street);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 //                    SharedPreferences.Editor editor = dataPref.edit();
 //                    editor.putString("location", address1[position]);
 //                    editor.commit();
-                    Intent intent = new Intent(context, RegisterMapActivity.class);
-                    intent.putExtra("address", address1[position]);
-                    context.startActivity(intent);
+                    Log.d("logggg", latLng.latitude+"::"+latLng.longitude+"");
+//                    Intent intent = new Intent(context, RegisterMapActivity.class);
+//                    intent.putExtra("address", list2.get(position));
+//                    context.startActivity(intent);
                 }
             });
         } else if (holder instanceof Item2ViewHolder) {
-            ((Item2ViewHolder) holder).location1.setText(address1[position]);
-            ((Item2ViewHolder) holder).location2.setText(address2[position]);
+
+                ((Item2ViewHolder) holder).location1.setText(list.get(position).address);
+
+                ((Item2ViewHolder) holder).location2.setText(list.get(position).name);
+
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(context, RegisterMapActivity.class);
-                    intent.putExtra("address", address1[position]);
+                    Intent intent = new Intent(context, RegisterActivity.class);
+                    intent.putExtra("address", list.get(position).address);
                     context.startActivity(intent);
+                    ((RegisterMapActivity)context).finish();
                 }
             });
         }
     }
 
+    /**
+     * 刷新数据
+     */
+    public void setData(ReverseGeoCodeResult reverseGeoCodeResult, LatLng latLng) {
+        this.latLng = latLng;
+        list.clear();
+        list2.clear();
+        list2.add(reverseGeoCodeResult);
+        list.add(null);
+        list.addAll(reverseGeoCodeResult.getPoiList());
+        notifyDataSetChanged();
+    }
     @Override
     public int getItemCount() {
-        return address1.length;
+       // Log.i(TAG, "getItemCount: "+list.size());
+        return list.size();
     }
+
+
 
     /**
      * Item点击事件监听器
@@ -108,14 +150,7 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
     }
 
 
-    /**
-     * 数据更新监听器
-     */
-    public interface onDataSetChangeListener{
 
-        void onDataSetChange(boolean isEmpty);
-    }
-    //item1 的ViewHolder
     public static class Item1ViewHolder extends RecyclerView.ViewHolder {
 
         @Bind(R.id.location1)
