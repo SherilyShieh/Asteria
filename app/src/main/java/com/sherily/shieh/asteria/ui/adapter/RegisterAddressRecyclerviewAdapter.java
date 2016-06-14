@@ -14,7 +14,10 @@ import android.widget.TextView;
 import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.PoiInfo;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
+import com.baidu.platform.comapi.map.A;
 import com.sherily.shieh.asteria.R;
+import com.sherily.shieh.asteria.baidumaputils.GeoCoderHelper;
+import com.sherily.shieh.asteria.model.AddressModel;
 import com.sherily.shieh.asteria.ui.RegisterActivity;
 import com.sherily.shieh.asteria.ui.RegisterMapActivity;
 
@@ -31,13 +34,16 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
 
     private static final String TAG = "RegisterAddressRecyclerviewAdapter";
 
-    private String[] address1;
-    private String[] address2;
+//    private String[] address1;
+//    private String[] address2;
     private LayoutInflater inflater;
     private Context context;
     private ArrayList<PoiInfo> list;
     private ArrayList<ReverseGeoCodeResult> list2;
     private LatLng latLng;
+    private AddressModel addressModel;
+    private ReverseGeoCodeResult reverseGeoCodeResult;
+    private GeoCoderHelper geoCoderHelper;
    // private SharedPreferences dataPref;
 
     public RegisterAddressRecyclerviewAdapter(Context context, ArrayList<ReverseGeoCodeResult> list2, ArrayList<PoiInfo> list) {
@@ -47,17 +53,6 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
         this.list = list;
     }
 
-
-//    public RegisterAddressRecyclerviewAdapter(Context context, ArrayList list,ArrayList list2) {
-//        this.context = context;
-//        this.list = list;
-//
-////        this.address1 = address1;
-////        this.address2 = address2;
-//        inflater = LayoutInflater.from(context);
-//
-//        //dataPref = context.getSharedPreferences("address_selected" , context.MODE_PRIVATE);
-//    }
 
 
     //建立枚举 2个item 类型
@@ -87,44 +82,94 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
 
         if (holder instanceof Item1ViewHolder) {
-                ((Item1ViewHolder) holder).location1.setText(list2.get(position).getAddress());
-                ((Item1ViewHolder) holder).location2.setText(list2.get(position).getAddressDetail().street);
+            addressModel = null;
+                ((Item1ViewHolder) holder).location1.setText(list2.get(holder.getAdapterPosition()).getAddress());
+                ((Item1ViewHolder) holder).location2.setText(list2.get(holder.getAdapterPosition()).getAddressDetail().street);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
 //                    SharedPreferences.Editor editor = dataPref.edit();
 //                    editor.putString("location", address1[position]);
 //                    editor.commit();
-                    Log.d("logggg", latLng.latitude+"::"+latLng.longitude+"");
+//                    Log.d("logggg", latLng.latitude+"::"+latLng.longitude+"");
+//                    Log.d("logggg", list2.get(position).getLocation().latitude+"::"+list2.get(position).getLocation().longitude
+//                    +"::");
+//                    Log.d("logggg","bussine:"+list2.get(position).getBusinessCircle());
 //                    Intent intent = new Intent(context, RegisterMapActivity.class);
 //                    intent.putExtra("address", list2.get(position));
 //                    context.startActivity(intent);
+                    Log.d("logggg","bussine:"+list2.get(holder.getAdapterPosition()).getAddressDetail().province
+                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().city
+                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().district
+                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().street
+                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().streetNumber);
+                    addressModel = holeAddressModel(latLng,list2.get(holder.getAdapterPosition()));
+                    Log.d("logggg","bussine:"+addressModel.getName()+"::"+addressModel.getAdress()+"::"+addressModel.getCity()
+                            +"::"+addressModel.getProvince()+"::"+addressModel.getDistrict()+"::"+addressModel.getStreet()+"::"+addressModel.getStreetNum());
                 }
             });
+
         } else if (holder instanceof Item2ViewHolder) {
-
-                ((Item2ViewHolder) holder).location1.setText(list.get(position).address);
-
-                ((Item2ViewHolder) holder).location2.setText(list.get(position).name);
-
+            addressModel = null;
+                ((Item2ViewHolder) holder).location1.setText(list.get(holder.getAdapterPosition()).name);
+                ((Item2ViewHolder) holder).location2.setText(list.get(holder.getAdapterPosition()).address);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Intent intent = new Intent(context, RegisterActivity.class);
-                    intent.putExtra("address", list.get(position).address);
-                    context.startActivity(intent);
-                    ((RegisterMapActivity)context).finish();
+//                    Intent intent = new Intent(context, RegisterActivity.class);
+//                    intent.putExtra("address", list.get(position).address);
+//                    context.startActivity(intent);
+//                    ((RegisterMapActivity)context).finish();
+                    Log.d("logggg","bussine:"+list.get(holder.getAdapterPosition()).name+"::"+list.get(holder.getAdapterPosition()).address+"::"+list.get(holder.getAdapterPosition()).city);
+//                    addressModel = holeAddressModel(list.get(position).location,null);
+//                    Log.d("logggg","bussine1:"+addressModel.getName()+"::"+addressModel.getAdress()+"::"+addressModel.getCity()
+//                    +"::"+addressModel.getProvince()+"::"+addressModel.getDistrict()+"::"+addressModel.getStreet()+"::"+addressModel.getStreetNum());
                 }
             });
+
         }
+    }
+
+    public AddressModel  holeAddressModel(LatLng latLng,ReverseGeoCodeResult result) {
+        addressModel = new AddressModel(latLng,result);
+        if (result != null){
+            addressModel.setModel();
+
+        }else {
+            reverseGeoCod(addressModel.getLatLng());
+            result = reverseGeoCodeResult;
+            addressModel.setResult(result);
+            addressModel.setModel();
+        }
+
+        return addressModel;
+    }
+
+
+
+    public void reverseGeoCod(LatLng latLng) {
+        geoCoderHelper = new GeoCoderHelper();
+        geoCoderHelper.setLatLng(latLng);
+        geoCoderHelper.setListener(new GeoCoderHelper.onReverseGeoCodeResultListener() {
+            @Override
+            public void result(Object obj, LatLng latLng) {
+                setReverseGeoCodeResult((ReverseGeoCodeResult)obj);
+            }
+        });
+        geoCoderHelper.reverseGeoCode();
+    }
+
+    public void setReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+        this.reverseGeoCodeResult = reverseGeoCodeResult;
     }
 
     /**
      * 刷新数据
      */
+
     public void setData(ReverseGeoCodeResult reverseGeoCodeResult, LatLng latLng) {
         this.latLng = latLng;
         list.clear();

@@ -1,13 +1,14 @@
 package com.sherily.shieh.asteria.baidumaputils;
 
 import android.content.Context;
+import android.util.Log;
 
 import com.baidu.location.BDLocation;
 import com.baidu.location.BDLocationListener;
 import com.baidu.mapapi.model.LatLng;
 import com.sherily.shieh.asteria.engine.SharePrefHelper;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
 
 
 /**
@@ -72,7 +73,20 @@ public class LocationListener implements BDLocationListener {
         //保存最新的位置信息
         SharePrefHelper.getInstance(context).putString(LOCATION_LAT_NAME, Double.toString(bdLocation.getLatitude()));
         SharePrefHelper.getInstance(context).putString(LOCATION_LNG_NAME, Double.toString(bdLocation.getLongitude()));
-
-        EventBus.getDefault().post(bdLocation);
+        Log.d(LOG_TAG, "onReceiveLocation: "+bdLocation.getAddrStr());
+        onLocationChangedListener.onChanged(bdLocation);
     }
+
+    public void setOnLocationChangedListener(OnLocationChangedListener onLocationChangedListener) {
+        this.onLocationChangedListener = onLocationChangedListener;
+    }
+
+    private OnLocationChangedListener   onLocationChangedListener;
+
+
+
+    public interface OnLocationChangedListener{
+        void onChanged(BDLocation bdLocation);
+    }
+
 }

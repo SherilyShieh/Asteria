@@ -42,11 +42,16 @@ import com.baidu.mapapi.search.poi.PoiSortType;
 import com.sherily.shieh.asteria.R;
 import com.sherily.shieh.asteria.baidumaputils.GeoCoderHelper;
 import com.sherily.shieh.asteria.baidumaputils.LocationHelper;
+import com.sherily.shieh.asteria.baidumaputils.LocationListener;
 import com.sherily.shieh.asteria.baidumaputils.MyLocation;
 import com.sherily.shieh.asteria.baidumaputils.PoiSearchHelper;
 import com.sherily.shieh.asteria.event.LocationEvent;
 import com.sherily.shieh.asteria.ui.adapter.DividerItemDecoration;
 import com.sherily.shieh.asteria.ui.adapter.RegisterAddressRecyclerviewAdapter;
+
+import org.greenrobot.eventbus.EventBus;
+import org.greenrobot.eventbus.Subscribe;
+import org.greenrobot.eventbus.ThreadMode;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -54,7 +59,6 @@ import java.util.List;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import de.greenrobot.event.EventBus;
 import retrofit.http.PUT;
 
 public class RegisterMapActivity extends BaseActivity {
@@ -86,10 +90,13 @@ public class RegisterMapActivity extends BaseActivity {
     private double longitude;
 //    private String[] adr1;
 //    private String[] adr2;
+    private BDLocation mlocation;
     private ArrayList<PoiInfo> list;
     private ArrayList<ReverseGeoCodeResult> list2;
+    private LatLng mSelfLocation;
 
     private RegisterAddressRecyclerviewAdapter adapter;
+    private com.sherily.shieh.asteria.baidumap.LocationHelper mLocationHelper;
 
 
 
@@ -115,8 +122,24 @@ public class RegisterMapActivity extends BaseActivity {
         }
     };
 
+
+    /*
+    * 添加当前位置图标
+    */
+    private void addLocationMarker() {
+
+        if (mSelfLocation == null)
+            return;
+        BitmapDescriptor descriptor = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
+        OverlayOptions option = new MarkerOptions()
+                .position(mSelfLocation)
+                .icon(descriptor);
+        mBaiduMap.addOverlay(option);
+    }
+
+
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register_map);
         ButterKnife.bind(this);
@@ -128,10 +151,15 @@ public class RegisterMapActivity extends BaseActivity {
         geoCoderHelper = new GeoCoderHelper();
         poiSearchHelper = new PoiSearchHelper();
 
+
+
         //setData();
         //地图相关初始化
         mapView.showZoomControls(false);
         mBaiduMap = mapView.getMap();
+        //隐藏baiduMap logo
+        View logo = mapView.getChildAt(1);
+        logo.setVisibility(View.INVISIBLE);
         //设置地图缩放级别16 类型普通地图
         MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(16.0f);
         mBaiduMap.setMapStatus(msu);
@@ -140,19 +168,46 @@ public class RegisterMapActivity extends BaseActivity {
         // 开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
+
         //定位初始化
         //注意: 实例化定位服务 LocationClient类必须在主线程中声明 并注册定位监听接口
-        myLocation = MyLocation.getMyLocation(mBaiduMap, this,latitude, longitude);
-        myLocation.setLocationOption();
-        myLocation.start();
+//        myLocation = MyLocation.getMyLocation(mBaiduMap, getApplicationContext(),latitude, longitude);
+//        myLocation.setLocationOption();
+//        myLocation.start();
+//        LocationHelper.sharedInstance(this).setOnLocationChangedListener(new LocationListener.OnLocationChangedListener() {
+//            @Override
+//            public void onChanged(BDLocation bdLocation) {
+//                onEventMainThread(bdLocation);
+//            }
+//        });
+//        LocationHelper.sharedInstance(this).start();
+        mLocationHelper = com.sherily.shieh.asteria.baidumap.LocationHelper.sharedInstance(this);
+        mLocationHelper.start();
+        mLocationHelper.addOnLocatedListener(new com.sherily.shieh.asteria.baidumap.LocationHelper.OnLocatedListener() {
+            @Override
+            public void onLocated(BDLocation bdLocation) {
+                LatLng ll = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
+                MapStatus mapStatus = new MapStatus.Builder()
+                        .target(ll)
+                        .zoom(15)
+                        .build();
+                MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+                mBaiduMap.animateMapStatus(u);
+                //mSelfLocation = ll;
+                BitmapDescriptor descriptor = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
+                OverlayOptions option = new MarkerOptions()
+                        .position(ll)
+                        .icon(descriptor);
+                mBaiduMap.addOverlay(option);
+            }
+        });
+        //addLocationMarker();
+       // MoveToSelf(mlocation);
 
        // mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
        // mBaiduMap.setOnMapClickListener(mOnMapClickListener);
 
 
-        //隐藏baiduMap logo
-        View logo = mapView.getChildAt(1);
-        logo.setVisibility(View.INVISIBLE);
 
 
         recyclerView.setHasFixedSize(true);
@@ -194,9 +249,44 @@ public class RegisterMapActivity extends BaseActivity {
 
     }
 
+
+
+    private void MoveToSelf(BDLocation location) {
+        LatLng ll = new LatLng(location.getLatitude(),location.getLongitude());
+        if (mBaiduMap != null) {
+            MapStatus mapStatus = new MapStatus.Builder()
+                    .target(ll)
+                    .zoom(15)
+                    .build();
+            MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+            mBaiduMap.animateMapStatus(u);
+        } /*else {
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    MoveToSelf(mlocation);
+                }
+            }, 1000);
+        }*/
+    }
+
+    @Subscribe(threadMode = ThreadMode.MAIN)
+    public void onEventMainThread(BDLocation location) {
+        Log.d(TAG, "onEventMainThread: "+location);
+        if(location == null) {
+            return;
+        }
+        if (location.getLatitude() > 0.0001f) {
+            mlocation = location;
+        }
+        MoveToSelf(mlocation);
+
+    }
     @OnClick(R.id.location)
     public void location() {
-        myLocation.MoveToSelf();
+        //MoveToSelf(mlocation);
+        //myLocation.MoveToSelf();
+        mLocationHelper.start();
     }
 
 
@@ -205,6 +295,7 @@ public class RegisterMapActivity extends BaseActivity {
         super.onStart();
         // 开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
+        mLocationHelper.start();
 
     }
 
@@ -225,16 +316,18 @@ public class RegisterMapActivity extends BaseActivity {
         super.onStop();
         // 关闭图层定位
         mBaiduMap.setMyLocationEnabled(false);
-        myLocation.stop();
+       // myLocation.stop();
+
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        myLocation.stop();
+        //myLocation.stop();
+        LocationHelper.sharedInstance(this).stop();
         geoCoderHelper.clear();
         mapView.onDestroy();
-
+        EventBus.getDefault().unregister(this);
     }
 
     private void onPre() {

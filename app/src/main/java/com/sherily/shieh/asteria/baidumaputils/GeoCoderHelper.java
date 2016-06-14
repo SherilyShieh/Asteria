@@ -17,7 +17,6 @@ import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 public class GeoCoderHelper {
     private LatLng latLng;
     private GeoCoder geoCoder;
-    private String address;
 
     /**
      * 初始化
@@ -40,10 +39,6 @@ public class GeoCoderHelper {
         geoCoder.reverseGeoCode(new ReverseGeoCodeOption().location(latLng));
     }
 
-    public String getAddress() {
-        return address;
-    }
-
     public void clear() {
         if (geoCoder != null){
             geoCoder.destroy();
@@ -61,7 +56,6 @@ public class GeoCoderHelper {
         public void onGetReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
 
            if (reverseGeoCodeResult == null || reverseGeoCodeResult.error != SearchResult.ERRORNO.NO_ERROR) {
-                address = "找不到图中地址信息";
                 return;
             }
 //            address = reverseGeoCodeResult.getAddress();

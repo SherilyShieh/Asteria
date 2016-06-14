@@ -7,7 +7,8 @@ import android.support.v7.app.AppCompatActivity;
 import com.sherily.shieh.asteria.AsteriaApplication;
 import com.sherily.shieh.asteria.di.component.ApplicationComponent;
 
-import de.greenrobot.event.EventBus;
+import org.greenrobot.eventbus.EventBus;
+
 
 /**
  * Created by xiejiali on 2016/6/1.
@@ -17,7 +18,7 @@ public class BaseActivity extends AppCompatActivity {
     public void onCreate(Bundle savedInstanceState, PersistableBundle persistentState) {
         super.onCreate(savedInstanceState, persistentState);
         initializeTnjector();
-        EventBus.getDefault().register(this);
+
     }
 
     private void initializeTnjector() {
@@ -31,6 +32,6 @@ public class BaseActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        EventBus.getDefault().unregister(this);
+
     }
 }

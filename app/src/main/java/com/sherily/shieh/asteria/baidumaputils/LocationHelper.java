@@ -162,5 +162,7 @@ public class LocationHelper {
         mLocationSpan = span < 1000 ? 1000 : span;
         return this;
     }
-
+    public void setOnLocationChangedListener(LocationListener.OnLocationChangedListener onLocationChangedListener) {
+        mLocationListener.setOnLocationChangedListener(onLocationChangedListener);
+    }
 }
