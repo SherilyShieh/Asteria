@@ -2,6 +2,8 @@ package com.sherily.shieh.asteria.ui;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.TextUtils;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -10,7 +12,9 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 
+import com.google.common.primitives.Booleans;
 import com.sherily.shieh.asteria.R;
+import com.sherily.shieh.asteria.engine.SharePrefHelper;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -36,21 +40,43 @@ public class RegisterActivity extends BaseActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_register);
         ButterKnife.bind(this);
-        Intent intent = getIntent();
-        address.setText(intent.getStringExtra("address"));
-
+        String resultAddress = SharePrefHelper.getInstance(this).getString("Selected_ResultAddress", "");
+        String poiAddress = SharePrefHelper.getInstance(this).getString("Selected_poiInfoAddress","");
+        String streetNum = SharePrefHelper.getInstance(this).getString("Edit_StreetNum", "");
+//        Boolean isPoiAddress = SharePrefHelper.getInstance(this).getBoolean("isPoiAddress",false);
+        if (!TextUtils.isEmpty(poiAddress)){
+            address.setText(poiAddress);
+        } else {
+           address.setText(resultAddress);
+        }
+        registerAdr.setText(streetNum);
+//        Log.d("RegisterActivity", "onCreate: >>>>>>>>>>>>>>"+address+"   "+streetNum);
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        address.setText(SharePrefHelper.getInstance(this).getString("Selected_ResultAddress",""));
+//        registerAdr.setText(SharePrefHelper.getInstance(this).getString("Edit_StreetNum",""));
+    }
 
     private void onNext() {
-        startActivity(new Intent(this, RegisterMapActivity.class));
+        loadActivity(RegisterMapActivity.class);
         overridePendingTransition(R.anim.slide_right_in, R.anim.slide_left_out);
     }
 
     private void onPre() {
-        startActivity(new Intent(this, MainActivity.class));
+        loadActivity(MainActivity.class);
         overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
+
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        Log.d("RegisterActivity", "onDestroy: >>>>>>>>>>>>>>");
+    }
+
     @OnClick(R.id.back)
     public void back() {
        onPre();
@@ -67,7 +93,7 @@ public class RegisterActivity extends BaseActivity {
     }
     @OnClick(R.id.confirm_button)
     public void modfiyConfirm() {
+        SharePrefHelper.getInstance(this).putString("Edit_StreetNum",registerAdr.getText().toString());
         onPre();
-        finish();
     }
 }

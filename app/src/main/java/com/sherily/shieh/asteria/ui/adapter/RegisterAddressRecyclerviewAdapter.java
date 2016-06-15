@@ -3,6 +3,7 @@ package com.sherily.shieh.asteria.ui.adapter;
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -15,14 +16,17 @@ import com.baidu.mapapi.model.LatLng;
 import com.baidu.mapapi.search.core.PoiInfo;
 import com.baidu.mapapi.search.geocode.ReverseGeoCodeResult;
 import com.baidu.platform.comapi.map.A;
+import com.sherily.shieh.asteria.AsteriaApplication;
 import com.sherily.shieh.asteria.R;
 import com.sherily.shieh.asteria.baidumaputils.GeoCoderHelper;
+import com.sherily.shieh.asteria.engine.SharePrefHelper;
 import com.sherily.shieh.asteria.model.AddressModel;
 import com.sherily.shieh.asteria.ui.RegisterActivity;
 import com.sherily.shieh.asteria.ui.RegisterMapActivity;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -38,20 +42,24 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
 //    private String[] address2;
     private LayoutInflater inflater;
     private Context context;
-    private ArrayList<PoiInfo> list;
-    private ArrayList<ReverseGeoCodeResult> list2;
-    private LatLng latLng;
-    private AddressModel addressModel;
-    private ReverseGeoCodeResult reverseGeoCodeResult;
-    private GeoCoderHelper geoCoderHelper;
-   // private SharedPreferences dataPref;
 
-    public RegisterAddressRecyclerviewAdapter(Context context, ArrayList<ReverseGeoCodeResult> list2, ArrayList<PoiInfo> list) {
+//    private ArrayList<PoiInfo> list;
+//    private ArrayList<ReverseGeoCodeResult> list2;
+    private LatLng latLng;
+//    private AddressModel addressModel;
+//    private ReverseGeoCodeResult reverseGeoCodeResult;
+//    private GeoCoderHelper geoCoderHelper;
+   // private SharedPreferences dataPref;
+    private List<AddressModel> mapAddressDataList;
+
+    public RegisterAddressRecyclerviewAdapter(Context context, List<AddressModel> mapAddressDataList) {
         this.context = context;
         inflater = LayoutInflater.from(context);
-        this.list2 = list2;
-        this.list = list;
+//        this.list2 = list2;
+//        this.list = list;
+        this.mapAddressDataList = mapAddressDataList;
     }
+
 
 
 
@@ -85,86 +93,172 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
     public void onBindViewHolder(final RecyclerView.ViewHolder holder, int position) {
 
         if (holder instanceof Item1ViewHolder) {
-            addressModel = null;
-                ((Item1ViewHolder) holder).location1.setText(list2.get(holder.getAdapterPosition()).getAddress());
-                ((Item1ViewHolder) holder).location2.setText(list2.get(holder.getAdapterPosition()).getAddressDetail().street);
+                ((Item1ViewHolder) holder).location1.setText(mapAddressDataList.get(holder.getAdapterPosition()).resultAdress);
+                ((Item1ViewHolder) holder).location2.setText(mapAddressDataList.get(holder.getAdapterPosition()).street);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-//                    SharedPreferences.Editor editor = dataPref.edit();
-//                    editor.putString("location", address1[position]);
-//                    editor.commit();
-//                    Log.d("logggg", latLng.latitude+"::"+latLng.longitude+"");
-//                    Log.d("logggg", list2.get(position).getLocation().latitude+"::"+list2.get(position).getLocation().longitude
-//                    +"::");
-//                    Log.d("logggg","bussine:"+list2.get(position).getBusinessCircle());
-//                    Intent intent = new Intent(context, RegisterMapActivity.class);
-//                    intent.putExtra("address", list2.get(position));
+                    keepData(holder.getAdapterPosition());
+//                    AddressModel addressModel = mapAddressDataList.get(holder.getAdapterPosition());
+//                    String resultAdress = addressModel.resultAdress;
+//                    String latitude =  Double.toString(addressModel.latLng.latitude);
+//                    String longitude = Double.toString(addressModel.latLng.longitude);
+//                    String poiInfoName = addressModel.poiName;
+//                    String poiInfoAddress = addressModel.poiAddress;
+//                    String province = addressModel.province;
+//                    String city = addressModel.city;
+//                    String distrct = addressModel.district;
+//                    String street = addressModel.street;
+//                    String streetNum = addressModel.streetNum;
+//                    SharePrefHelper.getInstance(context).putString("Selected_ResultAddress", resultAdress);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Latitude", latitude);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Longitude", longitude);
+//                    SharePrefHelper.getInstance(context).putString("Selected_poiInfoName", poiInfoName);
+//                    SharePrefHelper.getInstance(context).putString("Selected_poiInfoAddress", poiInfoAddress);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Province", province);
+//                    SharePrefHelper.getInstance(context).putString("Selected_City", city);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Distrct", distrct);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Street", street);
+//                    SharePrefHelper.getInstance(context).putString("Selected_streetNum", streetNum);
+////                    SharePrefHelper.getInstance(context).putBoolean("isPoiAddress", false);
+//                    Intent intent = new Intent(context, RegisterActivity.class);
 //                    context.startActivity(intent);
-                    Log.d("logggg","bussine:"+list2.get(holder.getAdapterPosition()).getAddressDetail().province
-                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().city
-                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().district
-                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().street
-                            +"::"+list2.get(holder.getAdapterPosition()).getAddressDetail().streetNumber);
-                    addressModel = holeAddressModel(latLng,list2.get(holder.getAdapterPosition()));
-                    Log.d("logggg","bussine:"+addressModel.getName()+"::"+addressModel.getAdress()+"::"+addressModel.getCity()
-                            +"::"+addressModel.getProvince()+"::"+addressModel.getDistrict()+"::"+addressModel.getStreet()+"::"+addressModel.getStreetNum());
+//                    ((RegisterMapActivity)context).finish();
                 }
             });
 
         } else if (holder instanceof Item2ViewHolder) {
-            addressModel = null;
-                ((Item2ViewHolder) holder).location1.setText(list.get(holder.getAdapterPosition()).name);
-                ((Item2ViewHolder) holder).location2.setText(list.get(holder.getAdapterPosition()).address);
+                ((Item2ViewHolder) holder).location1.setText(mapAddressDataList.get(holder.getAdapterPosition()).poiName);
+                ((Item2ViewHolder) holder).location2.setText(mapAddressDataList.get(holder.getAdapterPosition()).poiAddress);
             holder.itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
+                    keepData(holder.getAdapterPosition());
+//                    AddressModel addressModel = mapAddressDataList.get(holder.getAdapterPosition());
+//                    String resultAdress = addressModel.resultAdress;
+//                    String latitude =  Double.toString(addressModel.latLng.latitude);
+//                    String longitude = Double.toString(addressModel.latLng.longitude);
+//                    String poiInfoName = addressModel.poiName;
+//                    String poiInfoAddress = addressModel.poiAddress;
+//                    String province = addressModel.province;
+//                    String city = addressModel.city;
+//                    String distrct = addressModel.district;
+//                    String street = addressModel.street;
+//                    String streetNum = addressModel.streetNum;
+//                    SharePrefHelper.getInstance(context).putString("Selected_ResultAddress", resultAdress);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Latitude", latitude);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Longitude", longitude);
+//                    SharePrefHelper.getInstance(context).putString("Selected_poiInfoName", poiInfoName);
+//                    SharePrefHelper.getInstance(context).putString("Selected_poiInfoAddress", poiInfoAddress);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Province", province);
+//                    SharePrefHelper.getInstance(context).putString("Selected_City", city);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Distrct", distrct);
+//                    SharePrefHelper.getInstance(context).putString("Selected_Street", street);
+//                    SharePrefHelper.getInstance(context).putString("Selected_streetNum", streetNum);
+////                    SharePrefHelper.getInstance(context).putBoolean("isPoiAddress", true);
 //                    Intent intent = new Intent(context, RegisterActivity.class);
-//                    intent.putExtra("address", list.get(position).address);
 //                    context.startActivity(intent);
 //                    ((RegisterMapActivity)context).finish();
-                    Log.d("logggg","bussine:"+list.get(holder.getAdapterPosition()).name+"::"+list.get(holder.getAdapterPosition()).address+"::"+list.get(holder.getAdapterPosition()).city);
-//                    addressModel = holeAddressModel(list.get(position).location,null);
-//                    Log.d("logggg","bussine1:"+addressModel.getName()+"::"+addressModel.getAdress()+"::"+addressModel.getCity()
-//                    +"::"+addressModel.getProvince()+"::"+addressModel.getDistrict()+"::"+addressModel.getStreet()+"::"+addressModel.getStreetNum());
+//                    geoCoderHelper = new GeoCoderHelper();
+//                    geoCoderHelper.setLatLng(addressModel.latLng);
+//                    geoCoderHelper.setListener(new GeoCoderHelper.onReverseGeoCodeResultListener() {
+//                        @Override
+//                        public void result(Object obj, LatLng latLng) {
+//                            ReverseGeoCodeResult result = (ReverseGeoCodeResult)obj;
+//                            ReverseGeoCodeResult.AddressComponent addressComponent = ((ReverseGeoCodeResult) obj).getAddressDetail();
+//                            String resultAdress = result.getAddress();
+//                            String latitude =  Double.toString(latLng.latitude);
+//                            String longitude = Double.toString(latLng.longitude);
+//                            String province = addressComponent.province;
+//                            String city = addressComponent.city;
+//                            String distrct = addressComponent.district;
+//                            String street = addressComponent.street;
+//                            String streetNum = addressComponent.streetNumber;
+//                            SharePrefHelper.getInstance(context).putString("Selected_ResultAddress", resultAdress);
+//                            SharePrefHelper.getInstance(context).putString("Selected_Latitude", latitude);
+//                            SharePrefHelper.getInstance(context).putString("Selected_Longitude", longitude);
+//                            SharePrefHelper.getInstance(context).putString("Selected_Province", province);
+//                            SharePrefHelper.getInstance(context).putString("Selected_City", city);
+//                            SharePrefHelper.getInstance(context).putString("Selected_Distrct", distrct);
+//                            SharePrefHelper.getInstance(context).putString("Selected_Street", street);
+//                            SharePrefHelper.getInstance(context).putString("Selected_streetNum", streetNum);
+//                            Intent intent = new Intent(context, RegisterActivity.class);
+//                            context.startActivity(intent);
+////                    geoCoderHelper.clear();
+//                            ((RegisterMapActivity)context).finish();
+//                        }
+//                    });
+//                    geoCoderHelper.reverseGeoCode();
+
                 }
             });
 
         }
     }
 
-    public AddressModel  holeAddressModel(LatLng latLng,ReverseGeoCodeResult result) {
-        addressModel = new AddressModel(latLng,result);
-        if (result != null){
-            addressModel.setModel();
-
-        }else {
-            reverseGeoCod(addressModel.getLatLng());
-            result = reverseGeoCodeResult;
-            addressModel.setResult(result);
-            addressModel.setModel();
-        }
-
-        return addressModel;
+    /**
+     * 点击Recyclerview Item后持久化保存该Item对应的adressmodel的数据
+     * @param postion
+     */
+    private void keepData(int postion) {
+        AddressModel addressModel = mapAddressDataList.get(postion);
+        String resultAdress = addressModel.resultAdress;
+        String latitude =  Double.toString(addressModel.latLng.latitude);
+        String longitude = Double.toString(addressModel.latLng.longitude);
+        String poiInfoName = addressModel.poiName;
+        String poiInfoAddress = addressModel.poiAddress;
+        String province = addressModel.province;
+        String city = addressModel.city;
+        String distrct = addressModel.district;
+        String street = addressModel.street;
+        String streetNum = addressModel.streetNum;
+        SharePrefHelper.getInstance(context).putString("Selected_ResultAddress", resultAdress);
+        SharePrefHelper.getInstance(context).putString("Selected_Latitude", latitude);
+        SharePrefHelper.getInstance(context).putString("Selected_Longitude", longitude);
+        SharePrefHelper.getInstance(context).putString("Selected_poiInfoName", poiInfoName);
+        SharePrefHelper.getInstance(context).putString("Selected_poiInfoAddress", poiInfoAddress);
+        SharePrefHelper.getInstance(context).putString("Selected_Province", province);
+        SharePrefHelper.getInstance(context).putString("Selected_City", city);
+        SharePrefHelper.getInstance(context).putString("Selected_Distrct", distrct);
+        SharePrefHelper.getInstance(context).putString("Selected_Street", street);
+        SharePrefHelper.getInstance(context).putString("Selected_streetNum", streetNum);
+//                    SharePrefHelper.getInstance(context).putBoolean("isPoiAddress", false);
+        Intent intent = new Intent(context, RegisterActivity.class);
+        context.startActivity(intent);
+        ((RegisterMapActivity)context).finish();
     }
+//    public AddressModel  holeAddressModel(LatLng latLng,ReverseGeoCodeResult result) {
+//        addressModel = new AddressModel(latLng,result);
+//        if (result != null){
+//            addressModel.setModel();
+//
+//        }else {
+//            reverseGeoCod(addressModel.getLatLng());
+//            result = reverseGeoCodeResult;
+//            addressModel.setResult(result);
+//            addressModel.setModel();
+//        }
+//
+//        return addressModel;
+//    }
 
 
 
-    public void reverseGeoCod(LatLng latLng) {
-        geoCoderHelper = new GeoCoderHelper();
-        geoCoderHelper.setLatLng(latLng);
-        geoCoderHelper.setListener(new GeoCoderHelper.onReverseGeoCodeResultListener() {
-            @Override
-            public void result(Object obj, LatLng latLng) {
-                setReverseGeoCodeResult((ReverseGeoCodeResult)obj);
-            }
-        });
-        geoCoderHelper.reverseGeoCode();
-    }
-
-    public void setReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
-        this.reverseGeoCodeResult = reverseGeoCodeResult;
-    }
+//    public void reverseGeoCod(LatLng latLng) {
+//        geoCoderHelper = new GeoCoderHelper();
+//        geoCoderHelper.setLatLng(latLng);
+//        geoCoderHelper.setListener(new GeoCoderHelper.onReverseGeoCodeResultListener() {
+//            @Override
+//            public void result(Object obj, LatLng latLng) {
+//                setReverseGeoCodeResult((ReverseGeoCodeResult)obj);
+//            }
+//        });
+//        geoCoderHelper.reverseGeoCode();
+//    }
+//
+//    public void setReverseGeoCodeResult(ReverseGeoCodeResult reverseGeoCodeResult) {
+//        this.reverseGeoCodeResult = reverseGeoCodeResult;
+//    }
 
     /**
      * 刷新数据
@@ -172,19 +266,39 @@ public class RegisterAddressRecyclerviewAdapter extends RecyclerView.Adapter<Rec
 
     public void setData(ReverseGeoCodeResult reverseGeoCodeResult, LatLng latLng) {
         this.latLng = latLng;
-        list.clear();
-        list2.clear();
-        list2.add(reverseGeoCodeResult);
-        list.add(null);
-        list.addAll(reverseGeoCodeResult.getPoiList());
+        mapAddressDataList.clear();
+        String resultAddress = reverseGeoCodeResult.getAddress();
+        ReverseGeoCodeResult.AddressComponent addressComponent = reverseGeoCodeResult.getAddressDetail();
+        String province = addressComponent.province;
+        String city = addressComponent.city;
+        String district = addressComponent.district;
+        String street = addressComponent.street;
+        String streetNum = addressComponent.streetNumber;
+        mapAddressDataList.add(new AddressModel(latLng,null,null,resultAddress,province,city,district,street,streetNum));
+        List<PoiInfo> poiInfoList = reverseGeoCodeResult.getPoiList();
+        if (poiInfoList !=null){
+            for (PoiInfo poiInfo : poiInfoList){
+                mapAddressDataList.add(new AddressModel(poiInfo.location,poiInfo.name,poiInfo.address,null,null,null,null,null,null));
+            }
+
+        }
+//        list.clear();
+//        list2.clear();
+//        list2.add(reverseGeoCodeResult);
+//        list.add(null);
+//        list.addAll(reverseGeoCodeResult.getPoiList());
         notifyDataSetChanged();
     }
     @Override
     public int getItemCount() {
        // Log.i(TAG, "getItemCount: "+list.size());
-        return list.size();
+       //return list.size();
+        return mapAddressDataList.size();
     }
 
+    public boolean isItemNotEmpty() {
+        return mapAddressDataList.size()>0;
+    }
 
 
     /**

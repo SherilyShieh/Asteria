@@ -1,5 +1,6 @@
 package com.sherily.shieh.asteria.ui;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.support.v7.app.AppCompatActivity;
@@ -34,4 +35,10 @@ public class BaseActivity extends AppCompatActivity {
         super.onDestroy();
 
     }
+    public void loadActivity(Class<?> cls) {
+        Intent intent = new Intent(this,cls);
+        startActivity(intent);
+        finish();
+    }
+
 }

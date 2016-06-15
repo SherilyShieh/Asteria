@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Message;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -45,7 +46,9 @@ import com.sherily.shieh.asteria.baidumaputils.LocationHelper;
 import com.sherily.shieh.asteria.baidumaputils.LocationListener;
 import com.sherily.shieh.asteria.baidumaputils.MyLocation;
 import com.sherily.shieh.asteria.baidumaputils.PoiSearchHelper;
+import com.sherily.shieh.asteria.engine.SharePrefHelper;
 import com.sherily.shieh.asteria.event.LocationEvent;
+import com.sherily.shieh.asteria.model.AddressModel;
 import com.sherily.shieh.asteria.ui.adapter.DividerItemDecoration;
 import com.sherily.shieh.asteria.ui.adapter.RegisterAddressRecyclerviewAdapter;
 
@@ -98,6 +101,11 @@ public class RegisterMapActivity extends BaseActivity {
     private RegisterAddressRecyclerviewAdapter adapter;
     private com.sherily.shieh.asteria.baidumap.LocationHelper mLocationHelper;
 
+    private List<AddressModel> mapAddressDataList = new ArrayList<>();
+    private String selectedLatitude;
+    private String selectedLongitude;
+
+
 
 
     private BaiduMap.OnMapStatusChangeListener mOnMapStatusChangeListener = new BaiduMap.OnMapStatusChangeListener() {
@@ -126,13 +134,12 @@ public class RegisterMapActivity extends BaseActivity {
     /*
     * 添加当前位置图标
     */
-    private void addLocationMarker() {
-
-        if (mSelfLocation == null)
-            return;
+    private void addLocationMarker(LatLng latLng) {
+//        if (latLng == null)
+//            return;
         BitmapDescriptor descriptor = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
         OverlayOptions option = new MarkerOptions()
-                .position(mSelfLocation)
+                .position(latLng)
                 .icon(descriptor);
         mBaiduMap.addOverlay(option);
     }
@@ -149,7 +156,7 @@ public class RegisterMapActivity extends BaseActivity {
         list = new ArrayList<PoiInfo>();
         list2 = new ArrayList<ReverseGeoCodeResult>();
         geoCoderHelper = new GeoCoderHelper();
-        poiSearchHelper = new PoiSearchHelper();
+//        poiSearchHelper = new PoiSearchHelper();
 
 
 
@@ -165,8 +172,8 @@ public class RegisterMapActivity extends BaseActivity {
         mBaiduMap.setMapStatus(msu);
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
 
-        // 开启定位图层
-        mBaiduMap.setMyLocationEnabled(true);
+//        // 开启定位图层
+//        mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
 
         //定位初始化
@@ -181,27 +188,58 @@ public class RegisterMapActivity extends BaseActivity {
 //            }
 //        });
 //        LocationHelper.sharedInstance(this).start();
-        mLocationHelper = com.sherily.shieh.asteria.baidumap.LocationHelper.sharedInstance(this);
-        mLocationHelper.start();
-        mLocationHelper.addOnLocatedListener(new com.sherily.shieh.asteria.baidumap.LocationHelper.OnLocatedListener() {
-            @Override
-            public void onLocated(BDLocation bdLocation) {
-                LatLng ll = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
-                MapStatus mapStatus = new MapStatus.Builder()
-                        .target(ll)
-                        .zoom(15)
-                        .build();
-                MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
-                mBaiduMap.animateMapStatus(u);
-                //mSelfLocation = ll;
-                BitmapDescriptor descriptor = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
-                OverlayOptions option = new MarkerOptions()
-                        .position(ll)
-                        .icon(descriptor);
-                mBaiduMap.addOverlay(option);
-            }
-        });
-        //addLocationMarker();
+//        selectedLatitude = SharePrefHelper.getInstance(this).getString("Selected_Latitude","");
+//        selectedLongitude = SharePrefHelper.getInstance(this).getString("Selected_Longitude","");
+//        if (!TextUtils.isEmpty(selectedLatitude) && !TextUtils.isEmpty(selectedLongitude)) {
+//
+//            mSelfLocation = new LatLng(Double.parseDouble(selectedLatitude), Double.parseDouble(selectedLongitude));
+////            MapStatus mapStatus = new MapStatus.Builder()
+////                    .target(mSelfLocation)
+////                    .zoom(15)
+////                    .build();
+////            MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+////            mBaiduMap.animateMapStatus(u);
+//            moveTolocation(mSelfLocation);
+//            addLocationMarker(mSelfLocation);
+//        } else {
+            mLocationHelper = com.sherily.shieh.asteria.baidumap.LocationHelper.sharedInstance(this);
+
+            mLocationHelper.addOnLocatedListener(new com.sherily.shieh.asteria.baidumap.LocationHelper.OnLocatedListener() {
+                @Override
+                public void onLocated(BDLocation bdLocation) {
+//                MyLocationData locData = new MyLocationData.Builder()
+//                        .accuracy(bdLocation.getRadius())
+//                        .direction(100)// 此处设置开发者获取到的方向信息，顺时针0-360
+//                        .latitude(bdLocation.getLatitude())
+//                        .longitude(bdLocation.getLongitude())
+//                        .accuracy(bdLocation.getRadius())
+//                        .direction(bdLocation.getDirection())
+//                        .build();
+//                mBaiduMap.setMyLocationData(locData);
+//                BitmapDescriptor mCurrentMarker = BitmapDescriptorFactory
+//                        .fromResource(R.mipmap.map_location_self);
+//                MyLocationConfiguration config = new MyLocationConfiguration(MyLocationConfiguration.LocationMode.NORMAL, true, mCurrentMarker);
+//                mBaiduMap.setMyLocationConfigeration(config);
+
+                    LatLng ll = new LatLng(bdLocation.getLatitude(), bdLocation.getLongitude());
+//                    MapStatus mapStatus = new MapStatus.Builder()
+//                            .target(ll)
+//                            .zoom(15)
+//                            .build();
+//                    MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+//                    mBaiduMap.animateMapStatus(u);
+                    moveTolocation(ll);
+                    // mSelfLocation = ll;
+//                BitmapDescriptor descriptor = BitmapDescriptorFactory.fromResource(R.mipmap.map_location_self);
+//                OverlayOptions option = new MarkerOptions()
+//                        .position(ll)
+//                        .icon(descriptor);
+//                mBaiduMap.addOverlay(option);
+                    addLocationMarker(ll);
+                }
+            });
+//        }
+
        // MoveToSelf(mlocation);
 
        // mBaiduMap.setOnMarkerClickListener(mOnMarkerClickListener);
@@ -210,8 +248,9 @@ public class RegisterMapActivity extends BaseActivity {
 
 
 
+//        recyclerView.setVisibility(View.GONE);
         recyclerView.setHasFixedSize(true);
-        adapter = new RegisterAddressRecyclerviewAdapter(RegisterMapActivity.this,list2,list);
+        adapter = new RegisterAddressRecyclerviewAdapter(RegisterMapActivity.this,mapAddressDataList);
         final RecyclerView.LayoutManager layoutManager = new LinearLayoutManager(this, LinearLayoutManager.VERTICAL, false);
         recyclerView.setLayoutManager(layoutManager);
         recyclerView.setAdapter(adapter);
@@ -221,8 +260,12 @@ public class RegisterMapActivity extends BaseActivity {
             @Override
             public void result(Object obj,LatLng latLng) {
                 adapter.setData((ReverseGeoCodeResult) obj,latLng);
+//                if (adapter.isItemNotEmpty()) {
+//                    recyclerView.setVisibility(View.VISIBLE);
+//                }
             }
         });
+
 //        poiSearchHelper.setListener(new PoiSearchHelper.OnPoiResultListener() {
 //            @Override
 //            public void result(List<PoiInfo> datas) {
@@ -236,57 +279,70 @@ public class RegisterMapActivity extends BaseActivity {
 //                adapter.setData(datas);
 //            }
 //        });
+        mLocationHelper.start();
 
     }
 
-    private void setData() {
-        //UI测试数据，实际存放定位地址数据
-//        adr1 = new String[] {"花果山","水帘洞","高老庄","御花园"};
-//        adr2 = new String[] {"1001","1002","1003","1004"};
-//        adr1 = (String[]) myLocation.getArrayList1().toArray();
-//        adr2 = (String[]) myLocation.getArrayList2().toArray();
+//    private void setData() {
+//        //UI测试数据，实际存放定位地址数据
+////        adr1 = new String[] {"花果山","水帘洞","高老庄","御花园"};
+////        adr2 = new String[] {"1001","1002","1003","1004"};
+////        adr1 = (String[]) myLocation.getArrayList1().toArray();
+////        adr2 = (String[]) myLocation.getArrayList2().toArray();
+//
+//
+//    }
 
 
+    private void moveTolocation(LatLng latLng) {
+        MapStatus mapStatus = new MapStatus.Builder()
+                .target(latLng)
+                .zoom(15)
+                .build();
+        MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+        mBaiduMap.animateMapStatus(u);
     }
 
+//    private void MoveToSelf(BDLocation location) {
+//        LatLng ll = new LatLng(location.getLatitude(),location.getLongitude());
+//        if (mBaiduMap != null) {
+//            MapStatus mapStatus = new MapStatus.Builder()
+//                    .target(ll)
+//                    .zoom(15)
+//                    .build();
+//            MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
+//            mBaiduMap.animateMapStatus(u);
+//        } /*else {
+//            new Handler().postDelayed(new Runnable() {
+//                @Override
+//                public void run() {
+//                    MoveToSelf(mlocation);
+//                }
+//            }, 1000);
+//        }*/
+//    }
 
-
-    private void MoveToSelf(BDLocation location) {
-        LatLng ll = new LatLng(location.getLatitude(),location.getLongitude());
-        if (mBaiduMap != null) {
-            MapStatus mapStatus = new MapStatus.Builder()
-                    .target(ll)
-                    .zoom(15)
-                    .build();
-            MapStatusUpdate u = MapStatusUpdateFactory.newMapStatus(mapStatus);
-            mBaiduMap.animateMapStatus(u);
-        } /*else {
-            new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    MoveToSelf(mlocation);
-                }
-            }, 1000);
-        }*/
-    }
-
-    @Subscribe(threadMode = ThreadMode.MAIN)
-    public void onEventMainThread(BDLocation location) {
-        Log.d(TAG, "onEventMainThread: "+location);
-        if(location == null) {
-            return;
-        }
-        if (location.getLatitude() > 0.0001f) {
-            mlocation = location;
-        }
-        MoveToSelf(mlocation);
-
-    }
+//    @Subscribe(threadMode = ThreadMode.MAIN)
+//    public void onEventMainThread(BDLocation location) {
+//        Log.d(TAG, "onEventMainThread: "+location);
+//        if(location == null) {
+//            return;
+//        }
+//        if (location.getLatitude() > 0.0001f) {
+//            mlocation = location;
+//        }
+//        MoveToSelf(mlocation);
+//
+//    }
     @OnClick(R.id.location)
     public void location() {
         //MoveToSelf(mlocation);
         //myLocation.MoveToSelf();
-        mLocationHelper.start();
+//        if (!TextUtils.isEmpty(selectedLatitude) && !TextUtils.isEmpty(selectedLongitude)) {
+//            moveTolocation(mSelfLocation);
+//        } else {
+            mLocationHelper.start();
+//        }
     }
 
 
@@ -295,7 +351,7 @@ public class RegisterMapActivity extends BaseActivity {
         super.onStart();
         // 开启定位图层
         mBaiduMap.setMyLocationEnabled(true);
-        mLocationHelper.start();
+        //mLocationHelper.start();
 
     }
 
@@ -303,6 +359,9 @@ public class RegisterMapActivity extends BaseActivity {
     protected void onResume() {
         super.onResume();
         mapView.onResume();
+//        if (adapter.isItemNotEmpty()) {
+//            recyclerView.setVisibility(View.VISIBLE);
+//        }
     }
 
     @Override
@@ -324,27 +383,26 @@ public class RegisterMapActivity extends BaseActivity {
     protected void onDestroy() {
         super.onDestroy();
         //myLocation.stop();
-        LocationHelper.sharedInstance(this).stop();
+//        LocationHelper.sharedInstance(this).stop();
+        mLocationHelper.clearOnLocatedListener();
         geoCoderHelper.clear();
         mapView.onDestroy();
-        EventBus.getDefault().unregister(this);
+//        EventBus.getDefault().unregister(this);
     }
 
     private void onPre() {
-//        startActivity(new Intent(this, RegisterMapActivity.class));
+        loadActivity(RegisterActivity.class);
         overridePendingTransition(R.anim.slide_left_in, R.anim.slide_right_out);
     }
 
     @OnClick(R.id.back)
     public void back() {
         onPre();
-        this.finish();
     }
 
     @Override
     public void onBackPressed() {
         super.onBackPressed();
         onPre();
-        this.finish();
     }
 }

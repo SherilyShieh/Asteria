@@ -108,7 +108,7 @@ public class MyLocation {
             //MyLocationData.Builder定位数据建造器
             MyLocationData locData = new MyLocationData.Builder()
                     .accuracy(location.getRadius())
-                    .direction(location.getDirection())// 此处设置开发者获取到的方向信息，顺时针0-360
+                    .direction(100)// 此处设置开发者获取到的方向信息，顺时针0-360
                     .latitude(location.getLatitude())
                     .longitude(location.getLongitude())
                     .accuracy(location.getRadius())
