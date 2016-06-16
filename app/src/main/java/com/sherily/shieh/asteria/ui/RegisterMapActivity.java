@@ -1,9 +1,18 @@
 package com.sherily.shieh.asteria.ui;
 
+import android.Manifest;
+import android.annotation.TargetApi;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
@@ -68,10 +77,12 @@ public class RegisterMapActivity extends BaseActivity {
 
 
     private static final String TAG = "RegisterMapActivity" ;
+    private static final int REQUEST_PERMISSION_LOCATION = 1;
     @Bind(R.id.back)
     ImageView back;
     @Bind(R.id.topPanel)
     RelativeLayout topPanel;
+
     @Bind(R.id.mapView)
     TextureMapView mapView;
     @Bind(R.id.center_pointer)
@@ -81,7 +92,7 @@ public class RegisterMapActivity extends BaseActivity {
     @Bind(R.id.recyclerView)
     RecyclerView recyclerView;
 
-    
+
     //百度地图对象
     private BaiduMap mBaiduMap;
 
@@ -104,6 +115,7 @@ public class RegisterMapActivity extends BaseActivity {
     private List<AddressModel> mapAddressDataList = new ArrayList<>();
     private String selectedLatitude;
     private String selectedLongitude;
+    private Boolean isFirstShow = true;
 
 
 
@@ -144,7 +156,7 @@ public class RegisterMapActivity extends BaseActivity {
         mBaiduMap.addOverlay(option);
     }
 
-
+    @TargetApi(Build.VERSION_CODES.M)
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -159,6 +171,15 @@ public class RegisterMapActivity extends BaseActivity {
 //        poiSearchHelper = new PoiSearchHelper();
 
 
+        //请求必要的权限：位置信息，读取电话状态（获取deviceId必须）,存储空间（下载更新文件，保存图片必须）
+        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_LOCATION);
+            return;
+        }
 
         //setData();
         //地图相关初始化
@@ -168,7 +189,7 @@ public class RegisterMapActivity extends BaseActivity {
         View logo = mapView.getChildAt(1);
         logo.setVisibility(View.INVISIBLE);
         //设置地图缩放级别16 类型普通地图
-        MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(16.0f);
+        final MapStatusUpdate msu = MapStatusUpdateFactory.zoomTo(16.0f);
         mBaiduMap.setMapStatus(msu);
         mBaiduMap.setMapType(BaiduMap.MAP_TYPE_NORMAL);
 
@@ -235,6 +256,7 @@ public class RegisterMapActivity extends BaseActivity {
 //                        .position(ll)
 //                        .icon(descriptor);
 //                mBaiduMap.addOverlay(option);
+
                     addLocationMarker(ll);
                 }
             });
@@ -260,11 +282,19 @@ public class RegisterMapActivity extends BaseActivity {
             @Override
             public void result(Object obj,LatLng latLng) {
                 adapter.setData((ReverseGeoCodeResult) obj,latLng);
-//                if (adapter.isItemNotEmpty()) {
-//                    recyclerView.setVisibility(View.VISIBLE);
-//                }
+                if (isFirstShow) {
+                    isFirstShow = false;
+                    if (adapter.isItemNotEmpty()) {
+                        recyclerView.setVisibility(View.VISIBLE);
+//                        mBaiduMap.clear();
+                        mLocationHelper.start();
+                    }
+                }
+
+
             }
         });
+
 
 //        poiSearchHelper.setListener(new PoiSearchHelper.OnPoiResultListener() {
 //            @Override
@@ -292,6 +322,42 @@ public class RegisterMapActivity extends BaseActivity {
 //
 //
 //    }
+
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if (requestCode == REQUEST_PERMISSION_LOCATION) {
+            for (int gra : grantResults) {
+                if (gra != PackageManager.PERMISSION_GRANTED) {
+                    return;
+//                    //用户不同意，向用户展示该权限作用
+//                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
+//                        AlertDialog.Builder dia = new AlertDialog.Builder(this);
+//                        dia.setTitle("没有该权限没法定位");
+//                               dia .setPositiveButton("确定", new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int which) {
+//                                        finish();
+//                                    }
+//                                });
+//                               dia.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//                                    @Override
+//                                    public void onClick(DialogInterface dialog, int which) {
+//                                        finish();
+//                                    }
+//                                });
+//                        dia.create().show();
+//                        return;
+//                    }
+//                    finish();
+                }
+                }
+                mapView.showZoomControls(false);
+                mBaiduMap.setMyLocationEnabled(true);
+                mLocationHelper.start();
+            }
+        }
 
 
     private void moveTolocation(LatLng latLng) {
