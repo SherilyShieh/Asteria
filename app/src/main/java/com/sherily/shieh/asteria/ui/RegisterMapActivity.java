@@ -167,19 +167,11 @@ public class RegisterMapActivity extends BaseActivity {
 
         list = new ArrayList<PoiInfo>();
         list2 = new ArrayList<ReverseGeoCodeResult>();
-        geoCoderHelper = new GeoCoderHelper();
+
 //        poiSearchHelper = new PoiSearchHelper();
 
 
-        //请求必要的权限：位置信息，读取电话状态（获取deviceId必须）,存储空间（下载更新文件，保存图片必须）
-        if (checkSelfPermission(Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED
-                || checkSelfPermission(Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
-                || checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
-            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Manifest.permission.READ_PHONE_STATE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_LOCATION);
-            return;
-        }
+
 
         //setData();
         //地图相关初始化
@@ -196,7 +188,7 @@ public class RegisterMapActivity extends BaseActivity {
 //        // 开启定位图层
 //        mBaiduMap.setMyLocationEnabled(true);
         mBaiduMap.setOnMapStatusChangeListener(mOnMapStatusChangeListener);
-
+        geoCoderHelper = new GeoCoderHelper();
         //定位初始化
         //注意: 实例化定位服务 LocationClient类必须在主线程中声明 并注册定位监听接口
 //        myLocation = MyLocation.getMyLocation(mBaiduMap, getApplicationContext(),latitude, longitude);
@@ -268,8 +260,6 @@ public class RegisterMapActivity extends BaseActivity {
        // mBaiduMap.setOnMapClickListener(mOnMapClickListener);
 
 
-
-
 //        recyclerView.setVisibility(View.GONE);
         recyclerView.setHasFixedSize(true);
         adapter = new RegisterAddressRecyclerviewAdapter(RegisterMapActivity.this,mapAddressDataList);
@@ -282,20 +272,28 @@ public class RegisterMapActivity extends BaseActivity {
             @Override
             public void result(Object obj,LatLng latLng) {
                 adapter.setData((ReverseGeoCodeResult) obj,latLng);
-                if (isFirstShow) {
-                    isFirstShow = false;
-                    if (adapter.isItemNotEmpty()) {
-                        recyclerView.setVisibility(View.VISIBLE);
-//                        mBaiduMap.clear();
-                        mLocationHelper.start();
-                    }
-                }
+//                if (isFirstShow) {
+//                    isFirstShow = false;
+//                    if (adapter.isItemNotEmpty()) {
+//                        recyclerView.setVisibility(View.VISIBLE);
+////                        mBaiduMap.clear();
+//                        mLocationHelper.start();
+//                    }
+//                }
 
 
             }
         });
 
-
+        //请求必要的权限：位置信息，读取电话状态（获取deviceId必须）,存储空间（下载更新文件，保存图片必须）
+        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION)!= PackageManager.PERMISSION_GRANTED
+                ||  ContextCompat.checkSelfPermission(this, Manifest.permission.READ_PHONE_STATE) != PackageManager.PERMISSION_GRANTED
+                || ActivityCompat.checkSelfPermission(this, Manifest.permission.WRITE_EXTERNAL_STORAGE)!= PackageManager.PERMISSION_GRANTED) {
+            requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+                    Manifest.permission.READ_PHONE_STATE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_LOCATION);
+            return;
+        }
 //        poiSearchHelper.setListener(new PoiSearchHelper.OnPoiResultListener() {
 //            @Override
 //            public void result(List<PoiInfo> datas) {
@@ -330,11 +328,10 @@ public class RegisterMapActivity extends BaseActivity {
         if (requestCode == REQUEST_PERMISSION_LOCATION) {
             for (int gra : grantResults) {
                 if (gra != PackageManager.PERMISSION_GRANTED) {
-                    return;
 //                    //用户不同意，向用户展示该权限作用
 //                    if (!ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_COARSE_LOCATION)) {
 //                        AlertDialog.Builder dia = new AlertDialog.Builder(this);
-//                        dia.setTitle("没有该权限没法定位");
+//                        dia.setTitle("如果不开启定位，页面将无法正常显示");
 //                               dia .setPositiveButton("确定", new DialogInterface.OnClickListener() {
 //                                    @Override
 //                                    public void onClick(DialogInterface dialog, int which) {
@@ -342,15 +339,19 @@ public class RegisterMapActivity extends BaseActivity {
 //                                    }
 //                                });
 //                               dia.setNegativeButton("取消", new DialogInterface.OnClickListener() {
+//                                    @TargetApi(Build.VERSION_CODES.M)
 //                                    @Override
 //                                    public void onClick(DialogInterface dialog, int which) {
-//                                        finish();
+//                                       requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION,
+//                                                Manifest.permission.READ_PHONE_STATE,
+//                                                Manifest.permission.WRITE_EXTERNAL_STORAGE}, REQUEST_PERMISSION_LOCATION);
 //                                    }
 //                                });
 //                        dia.create().show();
 //                        return;
 //                    }
 //                    finish();
+                    return;
                 }
                 }
                 mapView.showZoomControls(false);
